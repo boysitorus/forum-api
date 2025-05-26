@@ -19,7 +19,7 @@ jobs:
         image: postgres
         env:
          POSTGRES_USER: postgres
-         POSTGRES_PASSWORD: h08137508732
+         POSTGRES_PASSWORD: secret
          POSTGRES_DB: forumapi_test
          
         options: >-
@@ -45,10 +45,10 @@ jobs:
         CI: true
         HOST: localhost
         PORT: 3000
-        PGHOST: forum-api-postgress.c78y8ig0g6ep.ap-southeast-1.rds.amazonaws.com
+        PGHOST: localhost
         PGPORT: 5432
         PGUSER: postgres
-        PGPASSWORD: h08137508732
+        PGPASSWORD: secret
         PGDATABASE: forumapi_test
         ACCESS_TOKEN_KEY: secret
         REFRESH_TOKEN_KEY: terces
