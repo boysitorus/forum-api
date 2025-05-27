@@ -3,10 +3,16 @@ const GetComments = require("../../Domains/comments/entities/GetComments");
 const GetReplies = require("../../Domains/replies/entities/GetReplies");
 
 class ThreadUseCase {
-  constructor({ threadRepository, commentRepository, replyRepository }) {
+  constructor({
+    threadRepository,
+    commentRepository,
+    replyRepository,
+    likeRepository,
+  }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
     this._replyRepository = replyRepository;
+    this._likeRepository = likeRepository;
   }
 
   async addThread(useCasePayload) {
@@ -26,7 +32,9 @@ class ThreadUseCase {
         id: comment.id,
         username: comment.username,
         content: comment.content,
-        deletedAt: comment.deleted_at ? new Date(comment.deleted_at).toISOString() : null,
+        deletedAt: comment.deleted_at
+          ? new Date(comment.deleted_at).toISOString()
+          : null,
         date: new Date(comment.date).toISOString(),
       };
     });
@@ -37,10 +45,14 @@ class ThreadUseCase {
     const repliesThread = replies.map((reply) => {
       return {
         ...reply,
-        deleted_at: reply.deleted_at ? new Date(reply.deleted_at).toISOString() : null,
+        deleted_at: reply.deleted_at
+          ? new Date(reply.deleted_at).toISOString()
+          : null,
         date: new Date(reply.date).toISOString(),
       };
     });
+
+    const likes = await this._likeRepository.getLikeByThreadId(threadId);
 
     // console.log(repliesThread); // debugging
 
@@ -52,7 +64,7 @@ class ThreadUseCase {
           const buildGetReplies = new GetReplies({
             replies: [reply],
           }).replies[0];
-          
+
           return buildGetReplies;
         });
 
@@ -60,11 +72,17 @@ class ThreadUseCase {
       const buildGetComment = new GetComments({ comments: [comment] })
         .comments[0];
 
+      // Count Like for Each Comment
+      const likesCount = likes.filter(
+        (like) => like.comment_id === comment.id
+      ).length;
+
       // Ensure the original properties from buildGetComment are preserved
       // and then append the replies array
       return {
         ...buildGetComment,
         replies: nestedReplies, // Assign the filtered and formatted replies
+        likeCount: likesCount,
       };
     });
 
